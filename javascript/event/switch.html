@@ -1,20 +1,36 @@
 <!DOCTYPE html>
-<script type="module">
-  let a = 3;
+<html lang="zh-CN">
 
-  switch (a) {
-    default:
-      console.log("The result is strange. Really.");
-    case 3:
-      console.log("You are right!");
+<head>
+  <meta charset="UTF-8">
+  <title>switch 贯穿（fall-through）示例</title>
+</head>
+
+<body>
+  <p>打开控制台查看输出。当前 <code>a = 6</code>：未命中 3/4/5，演示 default 与后续 case 的贯穿效果。</p>
+  <script type="module">
+    let a = 6;
+
+    switch (a) {
+      default:
+        console.log('The result is strange. Really.');
+      // 未匹配时模拟贯穿到 case 3 的代码路径（等价于 default 后 fall-through 到 case 3）
       a = 4;
-      break;
-    case 4:
-      console.log("Right!");
-      break;
-    case 5:
-      console.log("Wrong!");
-      console.log("Why don't you take a math class?");
-      break;
-  }
-</script>
+      // break;
+      case 3:
+        console.log('You are right!');
+        a = 4;
+        break;
+      case 4:
+        console.log('Right!');
+        break;
+      case 5:
+        console.log('Wrong!');
+        console.log("Why don't you take a math class?");
+        break;
+
+    }
+  </script>
+</body>
+
+</html>

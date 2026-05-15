@@ -1,52 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Event</title>
+  <title>事件捕获与冒泡</title>
   <style>
-    #event {
-      margin: 20px;
-      padding: 10px;
-      height: 100px;
-      background-color: green;
-    }
-    #click {
-      margin: 5px;
-      height: 20px;
-      background-color: aquamarine;
+    :root {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
     }
 
+    .demo {
+      max-width: 40rem;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+    }
+
+    .hint {
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .stack {
+      margin: 1rem 0;
+      padding: 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .stack--outer {
+      background: #2e7d32;
+      color: #fff;
+    }
+
+    .stack--middle {
+      background: #26a69a;
+    }
+
+  .stack--inner {
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+      border-radius: 6px;
+      background: #ffeb3b;
+      color: #212121;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .controls label {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .log {
+      margin: 0;
+      padding: 0.75rem 1rem 0.75rem 2rem;
+      max-height: 14rem;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+    }
+
+    .log:empty::before {
+      content: '点击黄色按钮后，这里会按时间顺序显示各阶段…';
+      color: #999;
+      list-style: none;
+      margin-left: -1rem;
+    }
+
+    .log li {
+      margin: 0.25rem 0;
+    }
   </style>
-  <script type="module">
-    const event2 = document.getElementById("event");
-    const click = document.getElementById("click");
-    click.onclick = function() {
-      return false;
-    }
-    event2.addEventListener("click", (e) => {
-      console.log('Event capture', e);
-      // e.stopImmediatePropagation();
-      // e.stopPropagation();
-    }, true);
-
-     click.addEventListener("click", (e) => {
-      console.log("click capture");
-      // e.stopPropagation();
-      e.stopImmediatePropagation();
-    }, true);
-
-    click.addEventListener("click", (e) => {
-      console.log("click");
-    });
-    event2.addEventListener('click', () => {
-      console.log('event bubble');
-    })
-  </script>
 </head>
 <body>
-  <div id="event">
-    <div id="click">Click</div>
-  </div>
+  <main class="demo">
+    <h1>事件捕获与冒泡</h1>
+    <p class="hint">
+      一次点击会经历：<strong>捕获</strong>（从外到内）→ <strong>目标</strong> → <strong>冒泡</strong>（从内到外）。
+      勾选「捕获监听」可对比关闭后的差异。
+    </p>
+
+    <div id="outer" class="stack stack--outer" data-layer="outer">
+      外层（outer）
+      <div class="stack stack--middle" data-layer="middle">
+        中层（middle）
+        <button type="button" id="inner" class="stack stack--inner" data-layer="inner">
+          点击我（inner）
+        </button>
+      </div>
+    </div>
+
+    <fieldset class="controls">
+      <legend>选项</legend>
+      <label>
+        <input type="checkbox" id="use-capture" checked>
+        注册捕获阶段监听（<code>addEventListener(..., true)</code>）
+      </label>
+      <label>
+        <input type="checkbox" id="stop-prop">
+        在 inner 的捕获回调里调用 <code>stopPropagation()</code>
+      </label>
+    </fieldset>
+
+    <h2>触发顺序</h2>
+    <ol id="log" class="log"></ol>
+  </main>
+
+  <script type="module">
+    import { setupEventPhaseDemo } from './event-phases.js';
+
+    setupEventPhaseDemo({
+      root: document.getElementById('outer'),
+      target: document.getElementById('inner'),
+      logList: document.getElementById('log'),
+      captureToggle: document.getElementById('use-capture'),
+      stopPropToggle: document.getElementById('stop-prop'),
+    });
+  </script>
 </body>
 </html>

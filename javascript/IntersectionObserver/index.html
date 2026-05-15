@@ -1,45 +1,197 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IntersectionObserver</title>
+  <title>IntersectionObserver 懒加载</title>
+  <style>
+    :root {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      color: #212121;
+    }
+
+    .demo {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 1rem 1rem 3rem;
+    }
+
+    .hint {
+      margin: 0.25rem 0 1rem;
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .controls label {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .controls output {
+      min-width: 2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .controls button {
+      justify-self: start;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: #f0f0f0;
+    }
+
+    .log {
+      margin: 0 0 1rem;
+      padding: 0.75rem 1rem 0.75rem 2rem;
+      max-height: 10rem;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+    }
+
+    .spacer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      margin-bottom: 1rem;
+      border: 2px dashed #bdbdbd;
+      border-radius: 8px;
+      color: #757575;
+      text-align: center;
+    }
+
+    .gallery {
+      display: grid;
+      gap: 2rem;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      margin-bottom: 0.35rem;
+      font-size: 0.9rem;
+      color: #424242;
+    }
+
+    .lazy-img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-height: 12rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #eceff1 0%, #cfd8dc 100%);
+      object-fit: cover;
+      transition: opacity 0.35s ease;
+      opacity: 0.35;
+    }
+
+    .lazy-img.is-loaded {
+      opacity: 1;
+    }
+  </style>
 </head>
-
 <body>
-  <img id="image" data-src="test.awebp" alt="Image" />
-  <script>
-    const observer = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            console.log('元素进入视口', entry.target);
-            // 可做懒加载、动画等逻辑
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        root: null,             // 默认是 viewport
-        rootMargin: '0px',
-        threshold: 0.1          // 进入视口10%就算出现
-      }
-    );
+  <main class="demo">
+    <h1>IntersectionObserver</h1>
+    <p class="hint">
+      图片未设置 <code>src</code>，仅保留 <code>data-src</code>。滚动到可视区域后由 Observer 赋值并
+      <code>unobserve</code>。对比
+      <a href="./IntersectionObserver.md">笔记</a>。
+    </p>
 
-    observer.observe(document.querySelector('#image'));
-    // 懒加载
-    const imgs = document.querySelectorAll("img[data-src]");
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.src = e.target.dataset.src;
-          io.unobserve(e.target);
-        }
-      });
+    <section class="controls" aria-label="Observer 选项">
+      <label>
+        threshold
+        <input id="threshold" type="range" min="0" max="1" step="0.1" value="0.1">
+        <output id="threshold-value" for="threshold">0.1</output>
+      </label>
+      <label>
+        rootMargin
+        <select id="root-margin">
+          <option value="0px">0px（进入视口才加载）</option>
+          <option value="120px 0px">120px 0px（提前约 120px 预加载）</option>
+          <option value="-40px 0px">-40px 0px（需更深入视口才触发）</option>
+        </select>
+      </label>
+      <button type="button" id="reset">重置图片</button>
+    </section>
+
+    <ol class="log" id="log" aria-live="polite"></ol>
+
+    <div class="spacer">↓ 向下滚动，观察懒加载与日志</div>
+
+    <section class="gallery" id="gallery">
+      <figure>
+        <figcaption>图 1 · test.awebp</figcaption>
+        <img
+          class="lazy-img"
+          data-src="test.awebp"
+          data-label="图 1"
+          alt="懒加载示例图 1"
+          width="640"
+          height="360"
+        >
+      </figure>
+      <figure>
+        <figcaption>图 2 · test.awebp</figcaption>
+        <img
+          class="lazy-img"
+          data-src="test.awebp"
+          data-label="图 2"
+          alt="懒加载示例图 2"
+          width="640"
+          height="360"
+        >
+      </figure>
+      <figure>
+        <figcaption>图 3 · test.awebp</figcaption>
+        <img
+          class="lazy-img"
+          data-src="test.awebp"
+          data-label="图 3"
+          alt="懒加载示例图 3"
+          width="640"
+          height="360"
+        >
+      </figure>
+    </section>
+  </main>
+
+  <script type="module">
+    import { setupLazyLoadDemo } from './lazy-observe.js';
+
+    setupLazyLoadDemo({
+      gallery: document.getElementById('gallery'),
+      logList: document.getElementById('log'),
+      thresholdInput: document.getElementById('threshold'),
+      thresholdValue: document.getElementById('threshold-value'),
+      rootMarginSelect: document.getElementById('root-margin'),
+      resetBtn: document.getElementById('reset'),
     });
-    imgs.forEach(img => io.observe(img));
   </script>
 </body>
-
 </html>
