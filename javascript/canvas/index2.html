@@ -1,266 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <style>
-    
-    </style>
-  </head>
-  <body>
-    <canvas width="1200" height="400" id="myCanvas"></canvas>
-    <script>
-      // 1、绘制饼状图
-      const PieChart = function (cnavasId, ctx) {
-        this.canvas = document.getElementById(cnavasId);
-        this.ctx = this.canvas.getContext("2d");
-        // 绘制饼图中心
-        this.W = this.ctx.canvas.width;
-        this.H = this.ctx.canvas.height;
-        // 圆心
-        this.x0 = this.W / 2 + 100;
-        this.y0 = this.H / 2;
-        // 半径
-        this.radius = 120;
-        // 伸出去的线的长度
-        this.outLine = 20;
-        // 说明的圆形大小
-        this.circleRadius = 5;
-        this.space = 10;
-        // 鼠标移动当前扇形半径
-        this.hoverRadius = 130;
-      };
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas 饼图</title>
+</head>
+<body>
+  <canvas id="pie-chart" width="1200" height="400"></canvas>
+  <script type="module">
+    import { PieChart } from './pie-chart.js';
+    import { pieChartData, pieChartColors } from './pie-chart-data.js';
 
-      // 初始化
-      PieChart.prototype.init = function (data, pointer) {
-        this.drawPie(data, pointer);
-      };
+    const chart = new PieChart(document.getElementById('pie-chart'), {
+      colors: pieChartColors,
+    });
 
-      // 画饼图
-      PieChart.prototype.drawPie = function (data, pointer) {
-        let that = this;
-        // 1、转化弧度
-        let angleList = this.transformAngle(data);
-        // 2、绘制饼图
-        let startAngle = 0;
-        angleList.forEach((item, index) => {
-          // 当前结束的弧度等于下一次的起始弧度
-          let endAngle = startAngle + item.angle;
-          this.ctx.beginPath();
-          this.ctx.moveTo(that.x0, that.y0);
-          this.ctx.arc(that.x0, that.y0, that.radius, startAngle, endAngle);
-          const outColor = (this.ctx.fillStyle = colorList[index]);
-          this.ctx.fill();
-          // 饼图事件：用于判断鼠标是否移入第 i 块图内
-          if (pointer && that.ctx.isPointInPath(pointer.x, pointer.y)) {
-            // 排除圆心坐标，鼠标移动到圆心时，不需要触发事件
-            if (pointer.x !== this.x0 && pointer.y !== this.y0) {
-              // 重新绘制当前扇形
-              // 1、扇形伸出点坐标和下划线终点坐标
-              this.ctx.beginPath();
-              this.ctx.moveTo(this.x0, this.y0);
-              this.ctx.arc(
-                this.x0,
-                this.y0,
-                this.hoverRadius,
-                startAngle,
-                endAngle,
-                false
-              );
-              // 绘制阴影
-              this.ctx.shadowBlur = 5;
-              this.ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-              this.ctx.fill();
-              // 有鼠标时绘制标题
-              this.drawMouseMoveTitle(
-                startAngle,
-                item.angle,
-                outColor,
-                item.title,
-                item.num,
-                item.percent
-              );
-            }
-          }
-          // 绘制说明部分
-          this.drawDesc(index, item.title, item.num, item.total, angleList.length, outColor, pointer);
-          // 下一次开始弧度等于这一次结束弧度
-          startAngle = endAngle;
-        });
-      };
-      // 鼠标移动到当前扇形放大效果
-      // 计算对应区块起始和结束对应的点
-      PieChart.prototype.drawMouseMoveTitle = function (
-        startAngle,
-        angle,
-        outColor,
-        outTitle,
-        outNum,
-        percent
-      ) {
-        // 去掉继承父类的阴影
-        this.ctx.shadowBlur = 0;
-        // 斜边C的长度 = 鼠标放大半径 + 延长线
-        const hEdge = this.hoverRadius + this.outLine;
-        // X轴方向的直角边
-        const hEdgeX = Math.cos(startAngle + angle / 2) * hEdge;
-        // Y轴方向的直角边
-        const hEdgeY = Math.sin(startAngle + angle / 2) * hEdge;
-        // 计算伸出去点的坐标（hOutX, hOutY）
-        const hOutX = this.x0 + hEdgeX;
-        const hOutY = this.y0 + hEdgeY;
-        const textWidth = this.ctx.measureText(`${outNum}   ${percent}%`).width;
-        if (hOutX > this.x0) {
-          // 画实心圆
+    const redraw = (event) => {
+      const pointer = event
+        ? { x: event.offsetX, y: event.offsetY }
+        : null;
+      chart.render(pieChartData, pointer);
+    };
 
-          this.ctx.beginPath()
-          this.ctx.arc(
-            hOutX + textWidth - this.circleRadius - 10,
-            hOutY - this.circleRadius,
-            this.circleRadius,
-            0,
-            2*Math.PI
-          )
-          this.ctx.fillStyle = outColor
-          this.ctx.fill()
-          this.ctx.fillStyle = '#585d61'
-          this.ctx.font = "20px Verdana"
-          this.ctx.fillText(outTitle, hOutX + textWidth, hOutY);
-          this.ctx.font = "15px Verdana"
-          this.ctx.fillText('销售金额：', hOutX + textWidth, hOutY+ 20);
-          this.ctx.fillStyle = '#121212'
-          this.ctx.font = "18px Verdana"
-          this.ctx.fillText(`${outNum}   ${percent}%`, hOutX + textWidth, hOutY+ 40);
-        } else {
-          // 画实心圆
-          this.ctx.beginPath()
-          this.ctx.arc(
-            hOutX - textWidth - this.circleRadius - 10,
-            hOutY - this.circleRadius,
-            this.circleRadius,
-            0,
-            2*Math.PI
-          )
-          this.ctx.fillStyle = outColor
-          this.ctx.fill()
-          this.ctx.fillStyle = '#585d61'
-          this.ctx.font = "20px Verdana"
-          this.ctx.fillText(outTitle, hOutX - textWidth, hOutY);
-          this.ctx.font = "15px Verdana"
-          this.ctx.fillText('销售金额：', hOutX - textWidth, hOutY+ 20);
-          this.ctx.fillStyle = '#121212'
-          this.ctx.font = "18px Verdana"
-          this.ctx.fillText(`${outNum}   ${percent}%`, hOutX - textWidth, hOutY+ 40);
-        } 
-  
-      };
-      // 绘制描述面板内容
-      PieChart.prototype.drawDesc = function (index, descTitle, descNum, total,length,outColor, pointer) {
-        // 去掉继承父类的阴影
-        this.ctx.shadowBlur = 0;
-        // 绘制圆形
-        this.ctx.beginPath()
-        this.ctx.arc(
-          this.space,
-          (this.H/2+ this.space + index * (this.circleRadius+ 10) * 2) - (length * (this.circleRadius+ 10) * 2)/2,
-          this.circleRadius,
-          0,
-          2*Math.PI
-        )
-        this.ctx.fillStyle = outColor
-        this.ctx.fill()
-        // 绘制地区文字
-        this.ctx.fillStyle = '#9a9a9c'
-        this.ctx.fillText(
-          descTitle,
-          this.space + this.circleRadius + 10,
-          (this.H/2+ this.space + index * (this.circleRadius+ 10) * 2 + this.circleRadius) - (length * (this.circleRadius+ 10) * 2)/2
-        );
-        this.ctx.fillStyle = '#9a9a9c'
-        // 绘制销售文字
-        this.ctx.font = "15px Verdana"
-        this.ctx.fillText(
-          descNum,
-          this.space + this.circleRadius + 100,
-          (this.H/2+ this.space + index * (this.circleRadius+ 10) * 2 + this.circleRadius) - (length * (this.circleRadius+ 10) * 2)/2
-        );
-        this.ctx.font = "20px Verdana"
-        // 绘制总额
-        this.ctx.fillText(
-          '总数',
-          this.W - 190,
-          100
-        );
-        this.ctx.font = "15px Verdana"
-        this.ctx.fillText(
-          `销售金额总和：${total}`,
-          this.W - 190,
-          130
-        );
-      };
+    chart.render(pieChartData);
 
-      // 转化弧度，返回的数据应该包含弧度
-      PieChart.prototype.transformAngle = function (data) {
-        let total = 0;
-        data.forEach((el) => (total += el.num));
-        // 创建弧度属性，添加到每个对象内
-        data.forEach((item) => {
-          const angle = (item.num / total) * Math.PI * 2;
-          const percent = ((item.num / total) * 100).toFixed(1)
-          item["total"] = total.toFixed(1)
-          item["percent"]  = percent
-          item["angle"] = angle;
-        });
-        return data;
-      };
-
-      // 数据准备
-      const data = [
-        { title: "华南", num: 662288.16 },
-        { title: "华北", num: 363106.69 },
-        { title: "华东", num: 322447.56 },
-        { title: "东北", num: 265306.02 },
-        { title: "西北", num: 159438.01 },
-        { title: "西南", num: 64472.76 },
-      ];
-
-      // 自定义颜色
-      const colorList = [
-        "#37a1da",
-        "#fea07f",
-        "#66e0e3",
-        "#ffdb5a",
-        "#e161ae",
-        "#ea6b68",
-        "#eb6c6c",
-      ];
-
-      // 初始化饼图
-      const pieChart = new PieChart("myCanvas", data);
-      pieChart.init(data);
-
-      // 监听鼠标在饼图上移动坐标
-      pieChart.canvas.addEventListener("mousemove", function (event) {
-        const x = event.offsetX;
-        const y = event.offsetY;
-        // 清空画布
-        pieChart.ctx.clearRect(0, 0, pieChart.W, pieChart.H);
-        // 重绘饼状图,将鼠标坐标进行传参
-        pieChart.init(data, { x, y });
-      });
-
-      // 监听鼠标点击扇形事件
-      pieChart.canvas.addEventListener("click", function (event) {
-        // 获取点击坐标
-        const x = event.offsetX;
-        const y = event.offsetY;
-        // 清空画布
-        pieChart.ctx.clearRect(0, 0, pieChart.W, pieChart.H);
-        // 重绘饼状图,将鼠标坐标进行传参
-        pieChart.init(data, { x, y }, "click");
-      });
-    </script>
-  </body>
+    chart.canvas.addEventListener('mousemove', redraw);
+    chart.canvas.addEventListener('click', redraw);
+  </script>
+</body>
 </html>

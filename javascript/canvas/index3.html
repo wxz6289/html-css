@@ -1,146 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./font_4616785_5i2yh3yp80g/iconfont.css">
-  <title>Document</title>
+  <link rel="stylesheet" href="./fonts/iconfont.css">
+  <title>图表类型卡片</title>
   <style>
-    #img-wrapper{
+    .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, 256px);
-      align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      gap: 10px;
     }
-    #img-wrapper .item {
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
-      width: 100%;
+
+    .gallery__card {
       height: 172px;
-      margin: 10px auto;
       border-radius: 10px;
-      background-color: #f3f3f3;
+      background: #f3f3f3 center / 100% 100% no-repeat;
     }
-    #img-wrapper .item img {
+
+    .gallery__overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
       width: 100%;
       height: 100%;
-    }
-    .icon-color {
-      color: #fff;
-      margin: 0 5px;
-    }
-    #img-wrapper .item .model {
-      position: relative;
-      background-color: rgba(0,0,0, 0.7);
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
+      border-radius: inherit;
+      background: rgba(0, 0, 0, 0.7);
       opacity: 0;
-      border-radius: 10px;
+      transition: opacity 0.2s ease;
     }
-    #img-wrapper .item .model:hover {
+
+    .gallery__card:hover .gallery__overlay {
       opacity: 1;
     }
-    #img-wrapper .item .btn {
-      position: absolute;
+
+    .gallery__btn {
       width: 80px;
       height: 30px;
-      background: rgb(39, 149, 233);
-      border-radius: 5px;
-      color: #fff;
       border: none;
-      left: 50%;
-      top: 40%;
-      transform: translate(-50%, -50%);
+      border-radius: 5px;
+      background: #0d47a1;
+      color: #ffffff;
+      cursor: pointer;
     }
-    #img-wrapper .item .icon-wrapper {
-      position: absolute;
-      left: 50%;
-      top: 60%;
-      transform: translate(-50%, -50%);
+
+    .gallery__icons {
+      color: #fff;
+    }
+
+    .gallery__icons .iconfont + .iconfont {
+      margin-left: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="img-wrapper">
-    <div class="item" style="background-image: url('./img/circle.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
-    <div class="item" style="background-image: url('./img/column.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
-    <div class="item" style="background-image: url('./img/combination.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
-    <div class="item" style="background-image: url('./img/line.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
-    <div class="item" style="background-image: url('./img/pivottable.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
-    <div class="item" style="background-image: url('./img/scatter.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
+  <div class="gallery" id="gallery" aria-label="图表类型列表"></div>
+  <script type="module">
+    import { chartImages, overlayIcons } from './gallery-data.js';
 
-     <div class="item" style="background-image: url('./img/stackedbarcolumn.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
-    <div class="item" style="background-image: url('./img/stackedcolumn.png');">
-      <div class="model">
-        <button class="btn">编辑</button>
-        <div class="icon-wrapper">
-          <span class="iconfont icon-xihuan icon-color"></span>
-          <span class="iconfont icon-shanchu icon-color"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script>
+    const gallery = document.getElementById('gallery');
 
+    for (const file of chartImages) {
+      const card = document.createElement('article');
+      card.className = 'gallery__card';
+      card.style.backgroundImage = `url('./img/${file}')`;
+
+      const icons = overlayIcons
+        .map((name) => `<span class="iconfont ${name}" aria-hidden="true"></span>`)
+        .join('');
+
+      card.innerHTML = `
+        <div class="gallery__overlay">
+          <button type="button" class="gallery__btn">编辑</button>
+          <div class="gallery__icons">${icons}</div>
+        </div>
+      `;
+
+      gallery.append(card);
+    }
   </script>
 </body>
 </html>
