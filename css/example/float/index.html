@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>float</title>
+    <style>
+        /* 
+        1. 包含块 overflow属性值设为auto、hidden、scroll或overlay
+        clip类似hidden,但禁止所有滚动,不会创建bfc。
+        overlay行为与auto相同，但是滚动条绘制在内容之上，而不是占据空间。
+
+        2. 父元素设置display值为inline-block,flex, flow-root, grid, inline-xxx, table,
+        */
+
+        /* 父级元素的float值优先级高于子元素的float值 */
+        .wrap {
+            display: flow-root;
+        }
+        .image1 {
+            float: left;
+            height: 200px;
+        }
+        .image2 {
+            float: right;
+            height: 200px;
+        }
+        .next-p{
+            margin-left: 100px;
+        }
+        p{
+            margin: 0;
+            /* margin-top: 20px; */
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <img class="image1" src="../assets/imgs/b.jpeg" alt="美女">
+        <img class="image2" src="../assets/imgs/b.jpeg" alt="美女">
+         <p class="next-p">夏日里骑电动车的成了小城一道靓丽的风景。如今骑电动车的太多了，男女老少都有。
+    </p>
+    </div>
+</body>
+</html>
