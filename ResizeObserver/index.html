@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResizeObserver</title>
+</head>
+<body>
+  <div id="box" style="width: 100px; height: 100px; background: red;"></div>
+<script>
+  const ro = new ResizeObserver((entries) => {
+  for (let entry of entries) {
+    const { width, height } = entry.contentRect;
+    console.log('size changed:', width, height, entry.target);
+  }
+});
+
+// 开始监听元素
+ro.observe(document.getElementById('box'));
+
+// 停止监听
+// ro.unobserve(...)
+// 取消所有监听： ro.disconnect()
+
+</script>
+</body>
+</html>

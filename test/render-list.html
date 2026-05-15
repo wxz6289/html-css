@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <ul></ul>
+        <script>
+            var people = [
+                { name: '牛油1号', id: 1, age: 20 },
+                { name: '牛油2号', id: 2, age: 21 },
+                { name: '牛油3号', id: 3, age: 19 },
+            ]
+            var ul = document.querySelector('ul');
+            function renderList(list){
+                const fg = document.createDocumentFragment();
+                list.forEach(({name, age})=> {
+                    let li = document.createElement('li');
+                    let text = document.createTextNode(`${name}${age}`);
+                    li.append(text);
+                    fg.append(li);
+                });
+                ul.append(fg);
+            }
+            
+            renderList(people);
+            
+        </script>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4616785 */
+  src: url('iconfont.woff2?t=1720608062555') format('woff2'),
+       url('iconfont.woff?t=1720608062555') format('woff'),
+       url('iconfont.ttf?t=1720608062555') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-xihuan:before {
+  content: "\e86f";
+}
+
+.icon-shanchu:before {
+  content: "\ec7b";
+}
+

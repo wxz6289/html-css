@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntersectionObserver</title>
+</head>
+
+<body>
+  <img id="image" data-src="test.awebp" alt="Image" />
+  <script>
+    const observer = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            console.log('元素进入视口', entry.target);
+            // 可做懒加载、动画等逻辑
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        root: null,             // 默认是 viewport
+        rootMargin: '0px',
+        threshold: 0.1          // 进入视口10%就算出现
+      }
+    );
+
+    observer.observe(document.querySelector('#image'));
+    // 懒加载
+    const imgs = document.querySelectorAll("img[data-src]");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.src = e.target.dataset.src;
+          io.unobserve(e.target);
+        }
+      });
+    });
+    imgs.forEach(img => io.observe(img));
+  </script>
+</body>
+
+</html>
