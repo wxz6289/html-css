@@ -1,4 +1,4 @@
-function prismes(n) {
+function primes(n) {
   for (let i = 2; i <= n; i++) {
     if (!isPrime(i)) continue;
     console.log(i);
@@ -13,4 +13,4 @@ function isPrime(n) {
   return true;
 }
 
-prismes(100);
+primes(100);
